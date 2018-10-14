@@ -1,6 +1,6 @@
 // project info
 organization := "com.github.nmasahiro"
-name := "fp-optimization"
+name := "model-based-dfo"
 version := "0.1.0"
 headerLicense := Some(HeaderLicense.MIT("2018", "Masahiro Nomura"))
 

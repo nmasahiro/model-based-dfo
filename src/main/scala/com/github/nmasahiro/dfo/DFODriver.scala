@@ -26,18 +26,19 @@ import com.github.nmasahiro.function._
 
 import scala.annotation.tailrec
 
-case class DFODriver(private val f: V => Double, η: Double, ε_stop: Double, stopCondition: StopCondition) {
+case class DFODriver(private val f: V => Double, η: Double, ε_stop: Double, stopCondition: StopCondition, verbose: Boolean = false) {
 
   @tailrec
   final def optimize(k: Int, x: V, Δ: Double, μ: Double): V = {
     val fx = f(x)
     // StopCondition check
     if (stopCondition.apply((k, fx))) {
-      println(s"stopCondition. k:$k, fx:$fx")
+      println(s"stopCondition. k:$k, x:$x, fx:$fx")
       x
     } else {
       // 1. Model:
-      println(s"x:$x, fx:$fx")
+      if (verbose)
+        println(s"k:$k, x:$x, fx:$fx")
       val approxGrad = SimplexGrad(x, fx, Δ, f)
       // 2. Model accuracy checks:
       if (Δ < ε_stop && norm(approxGrad) < ε_stop) {

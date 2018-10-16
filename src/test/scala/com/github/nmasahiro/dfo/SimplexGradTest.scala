@@ -4,6 +4,7 @@ import breeze.linalg.DenseVector
 import org.scalatest.{FunSuite, Matchers}
 import com.github.nmasahiro.function.Benchmark._
 import com.github.nmasahiro.function._
+import com.typesafe.config.ConfigFactory
 
 class SimplexGradTest extends FunSuite with Matchers {
 
@@ -11,28 +12,51 @@ class SimplexGradTest extends FunSuite with Matchers {
 
   test("SimplexGrad test") {
 
+    val conf = ConfigFactory.load()
+
+    // objective function
+    val fStr = conf.getString("dfo.test-common.func")
+    if (fStr == "sphere")
+      (x: V) => sphere(x)
+    else if (fStr == "ellipsoid")
+      (x: V) => ellipsoid(x)
+    else if (fStr == "rosenbrock-chain")
+      (x: V) => rosenbrockChain(x)
+    else
+      (x: V) => sphere(x) // default function
+
     // initial model accuracy parameter
-    val Δ = 1.0
+    val Δ = conf.getDouble("dfo.test-common.Δ")
+
     // initial target accuracy parameter
-    val μ = 1.0
+    val μ = conf.getDouble("dfo.test-common.μ")
+
     // an Armijo parameter
-    val η = 0.05
+    val η = conf.getDouble("dfo.test-common.η")
+
     // minimum decrease angle parameter
     // val ε_d = 0.0 // not use now (because d = - approx_grad is alwayls descent direction)
+
     // stopping tolerance
-    val ε_stop = 1e-4
+    val ε_stop = conf.getDouble("dfo.test-common.ε_stop")
+
     // iteration counter
-    val K = 200
+    val K = conf.getInt("dfo.test-common.K")
+
+    // min evaluation value
+    val minValue = conf.getDouble("dfo.test-common.min_value")
+
+    // verbose
+    val verbose = conf.getBoolean("dfo.test-common.verbose")
 
     // initial point
     val x = DenseVector(Array(1.0, 1.0))
-    // min evaluation value
-    val minValue = 1e-5
 
     val driver = DFODriver(f, η, ε_stop,
       iterationsExceed(K)
         orElse minEvalReached(minValue)
-        orElse proceed)
+        orElse proceed,
+      verbose)
 
     val expected = Array(0.0, 0.0)
 

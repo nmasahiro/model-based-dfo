@@ -1,13 +1,13 @@
 package com.github.nmasahiro.dfo
 
 import breeze.linalg.DenseVector
-import com.github.nmasahiro.function.Sphere
 import org.scalatest.{FunSuite, Matchers}
+import com.github.nmasahiro.function.Benchmark._
 import com.github.nmasahiro.function._
 
 class SimplexGradTest extends FunSuite with Matchers {
 
-  val f = new Sphere()
+  val f: V => Double = (x: V) => sphere(x)
 
   test("SimplexGrad test") {
 

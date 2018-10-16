@@ -26,13 +26,13 @@ import com.github.nmasahiro.function._
 
 import scala.annotation.tailrec
 
-case class DFODriver(private val f: FunctionBase, η: Double, ε_stop: Double, stopCondition: StopCondition) {
+case class DFODriver(private val f: V => Double, η: Double, ε_stop: Double, stopCondition: StopCondition) {
 
   @tailrec
   final def optimize(k: Int, x: V, Δ: Double, μ: Double): V = {
-    val fx = f.evaluate(x)
+    val fx = f(x)
     // StopCondition check
-    if (stopCondition.apply(k, fx)) {
+    if (stopCondition.apply((k, fx))) {
       println(s"stopCondition. k:$k, fx:$fx")
       x
     } else {

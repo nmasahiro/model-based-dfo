@@ -8,22 +8,17 @@ import com.typesafe.config.ConfigFactory
 
 class SimplexGradTest extends FunSuite with Matchers {
 
-  val f: V => Double = (x: V) => sphere(x)
-
   test("SimplexGrad test") {
 
     val conf = ConfigFactory.load()
 
     // objective function
-    val fStr = conf.getString("dfo.test-common.func")
-    if (fStr == "sphere")
-      (x: V) => sphere(x)
-    else if (fStr == "ellipsoid")
-      (x: V) => ellipsoid(x)
-    else if (fStr == "rosenbrock-chain")
-      (x: V) => rosenbrockChain(x)
-    else
-      (x: V) => sphere(x) // default function
+    val f: V => Double = (x: V) => conf.getString("dfo.test-common.func") match {
+      case "sphere" => sphere(x)
+      case "ellipsoid" => ellipsoid(x)
+      case "rosenbrock-chain" => rosenbrockChain(x)
+      case _ => sphere(x)
+    }
 
     // initial model accuracy parameter
     val Δ = conf.getDouble("dfo.test-common.Δ")

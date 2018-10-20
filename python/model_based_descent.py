@@ -1,52 +1,49 @@
 import numpy as np
 
-class Sphere(object):
-    def __init__(self, n, name):
-        self.n = n
-        self.name = name
-
-    def evaluate(self, x):
-        return np.sum(x**2)
 
 def get_simplex_grad(y0, f0, Delta, f):
     Y = [y0]
     n = y0.shape[0]
-    Y.extend([ np.array([np.random.rand()* 2 - 1 for i in range(n)]).reshape(n, 1) * Delta + y0 for i in range(1, n+1)])
+    Y.extend([np.array([np.random.rand() * 2 - 1 for i in range(n)]).reshape(n, 1) * Delta + y0 for i in range(1, n+1)])
     L = [Y[i] - Y[0] for i in range(1, n+1)]
     L = np.concatenate(L, axis=1)
     inv_L_T = np.linalg.inv(L.T)
-    delta_fY = np.array([f.evaluate(Y[i]) - f0 for i in range(1, n+1)]).reshape(n, 1)
+    delta_fY = np.array([f(Y[i]) - f0 for i in range(1, n+1)]).reshape(n, 1)
     alpha = np.dot(inv_L_T, delta_fY)
     return alpha
 
+
 # forward-backward-tracking line search
 def line_search(f, x, d, g, eta):
-    success_flag = True
 
     # 0. Initialise:
     tau = 1.
     N_max = 1000
     ip_d_g = np.dot(d.T, g)[0][0]
     # 1. Forward-backward search:
-    fx = f.evaluate(x)
-    if f.evaluate(x + tau * d) < fx + eta * tau * ip_d_g:
+    fx = f(x)
+    if f(x + tau * d) < fx + eta * tau * ip_d_g:
         success_flag = True
         tau = 1.
-        while tau <= pow(2, N_max) and f.evaluate(x + tau * d) < fx + eta * tau * ip_d_g:
+        while tau <= pow(2, N_max) and f(x + tau * d) < fx + eta * tau * ip_d_g:
             tau = 2 * tau
         tau = tau / 2.
     else:
         success_flag = False
         tau = 1.0
-        while tau >= pow(2, - N_max) and f.evaluate(x + tau * d) >= fx + eta * tau * ip_d_g:
+        while tau >= pow(2, - N_max) and f(x + tau * d) >= fx + eta * tau * ip_d_g:
             tau = tau / 2.
-        if f.evaluate(x + tau * d) < fx + eta * tau * ip_d_g:
+        if f(x + tau * d) < fx + eta * tau * ip_d_g:
             success_flag = True
     # 2. Output
     if success_flag:
         return success_flag, tau
     else:
         return success_flag, -1.
+
+
+def sphere(x):
+    return np.sum(x**2)
 
 
 def main():
@@ -59,19 +56,19 @@ def main():
     # an Armijo parameter
     eta = 0.05
     # minimum decrease angle parameter
-    epsilon_d = 0.0 # not use now (because d = - approx_grad is alwayls descent direction)
+    epsilon_d = 0.0  # not use now (because d = - approx_grad is alwayls descent direction)
     # stopping tolerance
     epsilon_stop = 1e-4
     # iteration counter
     K = 200
 
-    dim = 2
-    f = Sphere(dim, "s")
+    f = sphere
+
     # init point
     x = np.array([[1.0], [1.0]])
 
     for k in range(K):
-        fx = f.evaluate(x)
+        fx = f(x)
         print("fx:{}".format(fx))
         # 1. Model:
         # use Delta^k and a finite number of points
@@ -89,7 +86,6 @@ def main():
             continue
 
         # 3. Line search
-        flag_line_search = True
         # select descent direction d^k
         d = - approx_grad
 
@@ -101,6 +97,7 @@ def main():
             x = x + t * d
         else:
             mu = mu / 2.
+
 
 if __name__ == '__main__':
     main()
